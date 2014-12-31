@@ -53,33 +53,12 @@ class Question < ActiveRecord::Base
   #   result
   # end
 
-
   #super
   def results
-      # SQL
-      #
-      # SELECT
-      #   *
-      # FROM
-      #   (
-      #     SELECT
-      #       answer_choices.question_id, COUNT(*) AS num_responses
-      #     FROM
-      #       responses
-      #     LEFT OUTER JOIN
-      #       answer_choices ON answer_choices.id = responses.answer_choice_id
-      #     GROUP BY
-      #       answer_choices.question_id
-      #   ) resp_counts
-      #   JOIN answer_choices
-      #   ON answer_choices.question_id = resp_counts.question_id
-      #
-      # SQL
-
       self
       .answer_choices
       .joins('LEFT OUTER JOIN responses ON answer_choices.id = responses.answer_choice_id')
-      #.group(question_id)
+      .group(:choice).count
   end
 
 

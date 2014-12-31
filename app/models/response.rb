@@ -31,7 +31,13 @@ class Response < ActiveRecord::Base
   has_one :question, through: :answer_choice, source: :question
 
   def sibling_responses
-    self.question.responses.where('responses.id <> ? OR ? IS NULL', self.id, self.id)
+    #self.question.responses.where('responses.id <> ? OR ? IS NULL', self.id, self.id)
+    Question
+    .joins(answer_choices: :responses)
+    .where('answer_choices.id = ?', self.answer_choice_id)
+    .uniq
+    .joins(answer_choices: :responses)
+    .where('responses.id <> ? OR ? IS NULL', self.id, self.id)
   end
 
 
@@ -45,8 +51,11 @@ class Response < ActiveRecord::Base
     end
 
     def author_does_not_respond_to_own_poll
-      if user_id == self.question.poll.author_id
-        errors[:user_id] << "can't respond to own poll."
+      joined_table = Poll.joins(questions: :answer_choices)
+      author = joined_table.where('answer_choices.id = ?', self.answer_choice_id)[0].author_id
+
+      if user_id == author
+         errors[:user_id] << "can't respond to own poll."
       end
     end
 
